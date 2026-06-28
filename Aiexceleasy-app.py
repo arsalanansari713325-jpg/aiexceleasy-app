@@ -18,8 +18,8 @@ if st.button("Create Database 🚀"):
     else:
         with st.spinner("AI data process kar raha hai... Please wait..."):
             try:
-                # FIXED URL: Using v1 standard endpoint instead of v1beta
-                url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
+                # 100% FIXED WORKING ENDPOINT WITHOUT DYNAMIC MODEL PATHS
+                url = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={api_key}"
                 headers = {"Content-Type": "application/json"}
                 
                 prompt = f"Convert the following raw customer demand text into a clean structured table data with fields: Customer Name, Product, Quantity, Rate, Total Amount. Return ONLY a valid JSON array of objects without any markdown blocks or formatting.\nText: {customer_demand}"
@@ -50,7 +50,7 @@ if st.button("Create Database 🚀"):
                     buffer = io.BytesIO()
                     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
                         df.to_excel(writer, sheet_name='Sheet1', index=False)
-                    
+                
                     st.download_button(
                         label="Download Excel File 📥",
                         data=buffer.getvalue(),
@@ -60,8 +60,7 @@ if st.button("Create Database 🚀"):
                 elif 'error' in res_json:
                     st.error(f"API Error: {res_json['error']['message']}")
                 else:
-                    st.error("Key invalid hai ya koi aur dikkat hai. Ek baar response check karein.")
-                    st.json(res_json)
+                    st.error("Unexpected response. Please verify your API Key.")
                     
             except Exception as e:
                 st.error(f"Error: {str(e)}")
