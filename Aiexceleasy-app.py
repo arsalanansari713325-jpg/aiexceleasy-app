@@ -4,7 +4,7 @@ import json
 import requests
 import io
 
-st.title("📊 AI Excel Database Generator (Free)")
+st.title("📊 AI Excel Database Generator")
 st.write("Customer ki demand copy-paste karein aur Excel sheet payein!")
 
 api_key = st.text_input("Enter Google Gemini API Key:", type="password")
@@ -18,7 +18,6 @@ if st.button("Create Database 🚀"):
     else:
         with st.spinner("AI data process kar raha hai... Please wait..."):
             try:
-                # 100% FIXED AI STUDIO ENDPOINT
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
                 headers = {"Content-Type": "application/json"}
                 
@@ -57,10 +56,8 @@ if st.button("Create Database 🚀"):
                         file_name="AI_Generated_Database.xlsx",
                         mime="application/vnd.ms-excel"
                     )
-                elif 'error' in res_json:
-                    st.error(f"API Error: {res_json['error']['message']}")
                 else:
-                    st.error("Unexpected response. Please check your AI Studio Key.")
+                    st.error("Error generating content. Please check your API key or input.")
                     
             except Exception as e:
                 st.error(f"Error: {str(e)}")
