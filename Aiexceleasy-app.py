@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import json
-import openai
+from openai import OpenAI
 import io
 
 st.title("📊 AI Excel Database Generator")
@@ -18,10 +18,11 @@ if st.button("Create Database 🚀"):
     else:
         with st.spinner("AI data process kar raha hai... Please wait..."):
             try:
-                openai.api_key = api_key
+                # Naya OpenAI format
+                client = OpenAI(api_key=api_key)
                 prompt = f"Convert the following raw customer demand text into a clean structured table data with fields: Customer Name, Product, Quantity, Rate, Total Amount. Return ONLY a valid JSON array of objects.\nText: {customer_demand}"
                 
-                response = openai.ChatCompletion.create(
+                response = client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[{"role": "user", "content": prompt}]
                 )
