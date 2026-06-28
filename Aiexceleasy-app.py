@@ -18,7 +18,7 @@ if st.button("Create Database 🚀"):
     else:
         with st.spinner("AI data process kar raha hai... Please wait..."):
             try:
-                # Direct API URL - Bina kisi library ke
+                # Direct API URL using v1beta
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
                 headers = {"Content-Type": "application/json"}
                 
@@ -33,29 +33,35 @@ if st.button("Create Database 🚀"):
                 response = requests.post(url, headers=headers, json=payload)
                 res_json = response.json()
                 
-                # Extract text from Gemini response
-                raw_content = res_json['candidates'][0]['content']['parts'][0]['text'].strip()
-                
-                if raw_content.startswith("```json"):
-                    raw_content = raw_content[7:-3].strip()
-                elif raw_content.startswith("```"):
-                    raw_content = raw_content[3:-3].strip()
-                
-                data = json.loads(raw_content)
-                df = pd.DataFrame(data)
-                
-                st.success("Data Successfully Processed!")
-                st.dataframe(df)
-                
-                buffer = io.BytesIO()
-                with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-                    df.to_excel(writer, sheet_name='Sheet1', index=False)
-                
-                st.download_button(
-                    label="Download Excel File 📥",
-                    data=buffer.getvalue(),
-                    file_name="AI_Generated_Database.xlsx",
-                    mime="application/vnd.ms-excel"
-                )
+                # Safe checking for API response to avoid 'candidates' error
+                if 'candidates' in res_json and len(res_json['candidates']) > 0:
+                    raw_content = res_json['candidates'][0]['content']['parts'][0]['text'].strip()
+                    
+                    if raw_content.startswith("```json"):
+                        raw_content = raw_content[7:-3].strip()
+                    elif raw_content.startswith("```"):
+                        raw_content = raw_content[3:-3].strip()
+                    
+                    data = json.loads(raw_content)
+                    df = pd.DataFrame(data)
+                    
+                    st.success("Data Successfully Processed!")
+                    st.dataframe(df)
+                    
+                    buffer = io.BytesIO()
+                    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+                        df.to_excel(writer, sheet_name='Sheet1', index=False)
+                    
+                    st.download_button(
+                        label="Download Excel File 📥",
+                        data=buffer.getvalue(),
+                        file_name="AI_Generated_Database.xlsx",
+                        mime="application/vnd.ms-excel"
+                    )
+                elif 'error' in res_json:
+                    st.error(f"API Error: {res_json['error']['message']}")
+                else:
+                    st.error(f"Unexpected response format from AI. Please check your API key.")
+                    
             except Exception as e:
                 st.error(f"Error: {str(e)}")
