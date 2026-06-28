@@ -18,8 +18,8 @@ if st.button("Create Database 🚀"):
     else:
         with st.spinner("AI data process kar raha hai... Please wait..."):
             try:
-                # Direct API URL using v1beta
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+                # FIXED URL: Using v1 standard endpoint instead of v1beta
+                url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
                 headers = {"Content-Type": "application/json"}
                 
                 prompt = f"Convert the following raw customer demand text into a clean structured table data with fields: Customer Name, Product, Quantity, Rate, Total Amount. Return ONLY a valid JSON array of objects without any markdown blocks or formatting.\nText: {customer_demand}"
@@ -33,7 +33,6 @@ if st.button("Create Database 🚀"):
                 response = requests.post(url, headers=headers, json=payload)
                 res_json = response.json()
                 
-                # Safe checking for API response to avoid 'candidates' error
                 if 'candidates' in res_json and len(res_json['candidates']) > 0:
                     raw_content = res_json['candidates'][0]['content']['parts'][0]['text'].strip()
                     
@@ -61,7 +60,8 @@ if st.button("Create Database 🚀"):
                 elif 'error' in res_json:
                     st.error(f"API Error: {res_json['error']['message']}")
                 else:
-                    st.error(f"Unexpected response format from AI. Please check your API key.")
+                    st.error("Key invalid hai ya koi aur dikkat hai. Ek baar response check karein.")
+                    st.json(res_json)
                     
             except Exception as e:
                 st.error(f"Error: {str(e)}")
