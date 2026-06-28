@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import json
-import google.generativeai as genai
+import requests
 import io
 
 st.title("📊 AI Excel Database Generator (Free)")
@@ -16,17 +16,25 @@ if st.button("Create Database 🚀"):
     elif not customer_demand:
         st.error("Please paste some customer demand text!")
     else:
-        with st.spinner("Gemini AI data process kar raha hai... Please wait..."):
+        with st.spinner("AI data process kar raha hai... Please wait..."):
             try:
-                genai.configure(api_key=api_key)
+                # Direct API URL - Bina kisi library ke
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+                headers = {"Content-Type": "application/json"}
                 
-                # FIX: Model name updated to exact library requirement
-                model = genai.GenerativeModel("models/gemini-1.5-flash")
+                prompt = f"Convert the following raw customer demand text into a clean structured table data with fields: Customer Name, Product, Quantity, Rate, Total Amount. Return ONLY a valid JSON array of objects without any markdown blocks or formatting.\nText: {customer_demand}"
                 
-                prompt = f"Convert the following raw customer demand text into a clean structured table data with fields: Customer Name, Product, Quantity, Rate, Total Amount. Return ONLY a valid JSON array of objects without markdown formatting or code blocks.\nText: {customer_demand}"
+                payload = {
+                    "contents": [{
+                        "parts": [{"text": prompt}]
+                    }]
+                }
                 
-                response = model.generate_content(prompt)
-                raw_content = response.text.strip()
+                response = requests.post(url, headers=headers, json=payload)
+                res_json = response.json()
+                
+                # Extract text from Gemini response
+                raw_content = res_json['candidates'][0]['content']['parts'][0]['text'].strip()
                 
                 if raw_content.startswith("```json"):
                     raw_content = raw_content[7:-3].strip()
