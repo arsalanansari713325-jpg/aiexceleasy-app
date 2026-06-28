@@ -19,7 +19,9 @@ if st.button("Create Database 🚀"):
         with st.spinner("Gemini AI data process kar raha hai... Please wait..."):
             try:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                
+                # FIX: Model name updated to exact library requirement
+                model = genai.GenerativeModel("models/gemini-1.5-flash")
                 
                 prompt = f"Convert the following raw customer demand text into a clean structured table data with fields: Customer Name, Product, Quantity, Rate, Total Amount. Return ONLY a valid JSON array of objects without markdown formatting or code blocks.\nText: {customer_demand}"
                 
